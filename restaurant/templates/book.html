@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section>
+  <article>
+    <h1>Make a reservation</h1>
+    <!--Begin row-->
+    <div class="row">
+      <!--Begin col-->
+      <div class="column">
+          <form method="POST" id="form">
+            <!-- {% csrf_token %} -->
+            {% csrf_token %}
+            <p>
+              <label for="first_name">Name:</label>
+              <input type="text" placeholder="Your Name" maxlength="200" required="True" id="first_name">
+            </p>
+            <p>
+              <label for="first_name">Date:</label>
+              <input type="date" placeholder="Reservation Date" required="True" id="reservation_date">
+            </p>
+      
+            <p>
+              <label for="reservation_slot">Reservation time:</label>
+              <select id="reservation_slot">
+              </select>
+            </p>
+            <button type="submit" id="button">Reserve</button>
+          </form>
+      </div>
+      <!--End col-->
+
+      <!--Begin col-->
+      <div class="column">
+        <h2>Bookings For <span id="today"></span></h2>
+        <div id="bookings">
+        </div>
+      </div>
+      <!--End col-->
+    </div>
+    <!--End row-->
+
+
+
+
+  </article>
+</section>
+<script>
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('reservation_date').value = today;
+  document.getElementById('reservation_slot').value = 0;
+  document.getElementById('today').innerHTML = today;
+  getBookings(today);
+
+  /*  Step 10: Part two */
+
+  document.getElementById("reservation_date").addEventListener("change", (e)=>{
+    getBookings(e.target.value);
+  });
+
+  function setBookingsDisplay(data){
+    reserved_slots = []
+    bookings = ''
+    for (let item of data) {
+      reserved_slots.push(item.fields.reservation_slot);
+      bookings += `<p>${item.fields.first_name} - ${formatTime(item.fields.reservation_slot)}</p>`;
+    }
+
+    let slot_options = '<option value="0" disabled>Select time</option>';
+
+    for (let i = 10; i < 20; i++) {
+        const label = formatTime(i);
+        if (reserved_slots.includes(i)) {
+            slot_options += `<option value=${i} disabled>${label}</option>`;
+        } else {
+            slot_options += `<option value=${i}>${label}</option>`;
+        }
+    }
+
+    document.getElementById('reservation_slot').innerHTML = slot_options
+    if(bookings==''){
+      bookings = "No bookings"
+    }
+    document.getElementById('bookings').innerHTML = bookings
+  }
+
+  function getBookings(date) {
+    let reserved_slots = []
+    document.getElementById('today').innerHTML = date;
+    
+    fetch("{% url 'bookings' %}" + '?date=' + date)
+      .then(r => r.json())
+      .then(data => {
+        setBookingsDisplay(data)
+      })
+  }
+
+  function formatTime(time) {
+    const ampm = time < 12 ? 'AM' : 'PM'
+    const t = time < 12 ? time : time > 12 ? time - 12 : time
+    const label = `${t} ${ampm}`
+    return label
+  }
+
+
+  function validateForm() {
+      const firstName = document.getElementById('first_name').value;
+      const reservationDate = document.getElementById('reservation_date').value;
+      const reservationSlot = document.getElementById('reservation_slot').value;
+
+      if (!firstName || !reservationDate || reservationSlot === "0") {
+          alert('Please fill in all required fields.');
+          return false;
+      }
+      return true;
+  }
+
+  document.getElementById('button').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!validateForm()) {
+          return; // Stop the function if the form is not valid
+      }
+
+      const formdata = {
+        first_name: document.getElementById('first_name').value,
+        reservation_date: document.getElementById('reservation_date').value,
+        reservation_slot: document.getElementById('reservation_slot').value,
+      }
+
+      fetch("{% url 'bookings' %}", { method: 'post', body: JSON.stringify(formdata) }).then(r=>r.json()).then(data=>setBookingsDisplay(data));
+  });
+
+</script>
+{% endblock %}
+
