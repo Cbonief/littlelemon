@@ -2,10 +2,10 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
-class User(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    city = models.CharField(max_length=30)
+# class User(models.Model):
+#     first_name = models.CharField(max_length=30)
+#     last_name = models.CharField(max_length=30)
+#     city = models.CharField(max_length=30)
 
 class Booking(models.Model):
     id = models.AutoField(primary_key=True)
