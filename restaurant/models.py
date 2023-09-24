@@ -30,4 +30,4 @@ class Menu(models.Model):
    inventory = models.IntegerField(default=1)
 
    def __str__(self):
-      return self.name
+      return f"{self.name} - {self.price}"
