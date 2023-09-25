@@ -19,13 +19,13 @@ class Booking(models.Model):
     date = models.DateField()
 
     def __str__(self):
-        return f"{self.name} - {self.date}"
+        return f"{self.first_name} - {self.date}"
 
 
 # Add code to create Menu model
 class Menu(models.Model):
    id = models.AutoField(primary_key=True)
-   name = models.CharField(max_length=200) 
+   name = models.CharField(max_length=200)  
    price = models.DecimalField(max_digits=10, decimal_places=2)
    inventory = models.IntegerField(default=1)
 
